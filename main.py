@@ -51,7 +51,7 @@ def files():
                 # Sending the code to ChatGPT
                 response = openai.Completion.create(
                     engine=args.openai_engine,
-                    prompt=(f"Explain Code:\n```{content}```"),
+                    prompt=prompt_text(content),
                     temperature=float(args.openai_temperature),
                     max_tokens=int(args.openai_max_tokens)
                 )
@@ -103,6 +103,23 @@ def patch():
             print(error_message)
             pull_request.create_issue_comment(f"ChatGPT was unable to process the response about {file_name}")
 
+
+# Construct the prompt
+def prompt_text(code: str) -> str:
+    prompt = f"""
+    Please thoroughly review the provided WordPress theme or plugin code based on the following criteria:
+    1. **Best Practices**: Ensure the code adheres to WordPress Codex standards.
+    2. **Security**: Look for potential vulnerabilities, especially in data handling. Ensure proper sanitization methods are used.
+    3. **Readability**: Suggest improvements to make the code more readable and maintainable.
+    4. **Optimization**: Analyze the time and space complexity, and recommend ways to enhance performance.
+    5. **Naming Conventions**: Offer better naming suggestions for variables, functions, and classes, if necessary.
+    After the analysis, provide detailed feedback and actionable suggestions for improvements.
+
+    CODE STARTS HERE:
+
+    {code}
+    """
+    return prompt
 
 def get_content_patch():
     url = f"https://api.github.com/repos/{os.getenv('GITHUB_REPOSITORY')}/pulls/{args.github_pr_id}"
