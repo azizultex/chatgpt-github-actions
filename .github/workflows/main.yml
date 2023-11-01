@@ -22,8 +22,8 @@ jobs:
           openai_engine: "gpt-3.5-turbo-16k" #gpt-4, gpt-3.5-turbo, gpt-3.5-turbo-16k
           openai_temperature: 1 #optional
           openai_max_tokens: 4096 #optional
-          file_extensions: ".php,.js"
           mode: patch # files or patch 
+          file_extensions: ".php,.js"
           prompt_text: |
             You're an expert programmer. You know a wide range of programming. 
             Now, I will provide you some code from a Github pul request. 

@@ -27,8 +27,6 @@ args = parser.parse_args()
 
 file_extensions = args.file_extensions.split(',')
 
-print('file_extensions', file_extensions)
-
 ## Authenticating with the OpenAI API
 openai.api_key = args.openai_api_key
 
@@ -151,13 +149,7 @@ def patch():
 
 # Construct the prompt
 def prompt_text(code: str) -> str:
-
-    print("args.prompt_text inside prompt_text func", args.prompt_text);
-
     prompt = args.prompt_text.replace("{code}", code)
-
-    print("prompt", prompt)
-
     return prompt
 
 
