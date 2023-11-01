@@ -116,13 +116,13 @@ def patch():
 # Construct the prompt
 def prompt_text(code: str) -> str:
     prompt = f"""
-    Act as an expert WordPress developer. Please thoroughly review the provided WordPress theme or plugin code from Github pull request based on the following criteria:
+    Act as an expert php, javascript developer. Please thoroughly review the provided WordPress theme or plugin code from Github pull request based on the following criteria:
     1. **Best Practices**: Ensure the code adheres to WordPress Codex standards.
     2. **Security**: Look for potential vulnerabilities, especially in data handling. Ensure proper sanitization methods are used.
     3. **Readability**: Suggest improvements to make the code more readable and maintainable.
     4. **Optimization**: Analyze the time and space complexity, and recommend ways to enhance performance.
     5. **Naming Conventions**: Offer better naming suggestions for variables, functions, and classes, if necessary.
-    After the analysis, please point out the exact issues in the code with line number in a block and provide possible solutions.
+    After the analysis, please point out the exact issues in the code with line number in a block and provide possible solutions. Don't explain anything if codes looks fine. Just response "looks good!" if no possible issues found.
 
     CODE STARTS HERE:
 
