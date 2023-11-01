@@ -42,23 +42,27 @@ def files():
         print("files", files)
 
         for file in files:
-            # Getting the file name and content
-            filename = file.filename
-            content = repo.get_contents(filename, ref=commit.sha).decoded_content
+            try:
+                # Getting the file name and content
+                filename = file.filename
+                content = repo.get_contents(filename, ref=commit.sha).decoded_content
+                print("content", content)
 
-            print("content", content)
+                # Sending the code to ChatGPT
+                response = openai.Completion.create(
+                    engine=args.openai_engine,
+                    prompt=(f"Explain Code:\n```{content}```"),
+                    temperature=float(args.openai_temperature),
+                    max_tokens=int(args.openai_max_tokens)
+                )
 
-            # Sending the code to ChatGPT
-            response = openai.Completion.create(
-                engine=args.openai_engine,
-                prompt=(f"Explain Code:\n```{content}```"),
-                temperature=float(args.openai_temperature),
-                max_tokens=int(args.openai_max_tokens)
-            )
-
-            # Adding a comment to the pull request with ChatGPT's response
-            pull_request.create_issue_comment(
-                f"ChatGPT's response about `{file.filename}`:\n {response['choices'][0]['text']}")
+                # Adding a comment to the pull request with ChatGPT's response
+                pull_request.create_issue_comment(
+                    f"ChatGPT's response about `{file.filename}`:\n {response['choices'][0]['text']}")
+            except Exception as e:
+                error_message = str(e)
+                print(f"Error occurred for file {file.filename}: {error_message}")
+                pull_request.create_issue_comment(f"ChatGPT encountered an error while processing `{file.filename}`: {error_message}")
 
 
 def patch():
@@ -72,6 +76,8 @@ def patch():
         return
 
     parsed_text = content.split("diff")
+
+    print("parsed_text", parsed_text)
 
     for diff_text in parsed_text:
         if len(diff_text) == 0:
@@ -109,10 +115,14 @@ def get_content_patch():
 
     response = requests.request("GET", url, headers=headers)
 
+    print("Response", response)
+
     if response.status_code != 200:
         raise Exception(response.text)
 
     return response.text
+
+    print("Response text", response.text)
 
 
 if (args.mode == "files"):
