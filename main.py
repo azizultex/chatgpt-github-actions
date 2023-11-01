@@ -46,7 +46,9 @@ def files():
                 # Getting the file name and content
                 filename = file.filename
                 content = repo.get_contents(filename, ref=commit.sha).decoded_content
-                print("content", content)
+
+
+                print("prompt_text", prompt_text(content))
 
                 # Sending the code to ChatGPT
                 response = openai.ChatCompletion.create(
@@ -63,7 +65,7 @@ def files():
 
                 # Adding a comment to the pull request with ChatGPT's response
                 pull_request.create_issue_comment(
-                    f"ChatGPT's response about `{file.filename}`:\n {response['choices'][0]['text']}")
+                    f"ChatGPT's response about `{file.filename}`:\n {response['choices'][0]['message']['content']}")
             except Exception as e:
                 error_message = str(e)
                 print(f"Error occurred for file {file.filename}: {error_message}")
@@ -92,6 +94,8 @@ def patch():
             file_name = diff_text.split("b/")[1].splitlines()[0]
             print(file_name)
 
+            print("prompt_text", prompt_text(diff_text))
+
             response = openai.ChatCompletion.create(
                 model=args.openai_engine,
                 messages=prompt_text(diff_text),
@@ -102,7 +106,7 @@ def patch():
             print(response['choices'][0]['text'])
 
             pull_request.create_issue_comment(
-                f"ChatGPT's response about ``{file_name}``:\n {response['choices'][0]['text']}")
+                f"ChatGPT's response about ``{file_name}``:\n {response['choices'][0]['message']['content']}")
         except Exception as e:
             error_message = str(e)
             print(error_message)
@@ -128,7 +132,6 @@ def prompt_text(code: str) -> str:
 
 def get_content_patch():
     url = f"https://api.github.com/repos/{os.getenv('GITHUB_REPOSITORY')}/pulls/{args.github_pr_id}"
-    print(url)
 
     headers = {
         'Authorization': f"token {args.github_token}",
@@ -137,14 +140,13 @@ def get_content_patch():
 
     response = requests.request("GET", url, headers=headers)
 
-    print("Response", response)
 
     if response.status_code != 200:
         raise Exception(response.text)
 
     return response.text
 
-    print("Response text", response.text)
+    print("get_content_patch", response.text)
 
 
 if (args.mode == "files"):
