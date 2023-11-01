@@ -61,7 +61,7 @@ def files():
                 pull_request.create_issue_comment(
                     f"ChatGPT's response about ``{file_name}``:\n {response_text}")
 
-                if response_text.strip().lower() != "looks ok!":
+                if response_text.strip().lower() != "looks good!":
                     exit(1)
 
             except Exception as e:
@@ -81,13 +81,15 @@ def patch():
 
     parsed_text = content.split("diff")
 
+    print("parsed_text", parsed_text)
+
     for diff_text in parsed_text:
         if len(diff_text) == 0:
             continue
 
         try:
             file_name = diff_text.split("b/")[1].splitlines()[0]
-            print(file_name)
+            print("file_name", file_name)
 
             response = openai.ChatCompletion.create(
                 model=args.openai_engine,
@@ -98,10 +100,12 @@ def patch():
 
             response_text = response['choices'][0]['message']['content'];
 
+            print("response_text", response_text)
+
             pull_request.create_issue_comment(
                 f"ChatGPT's response about ``{file_name}``:\n {response_text}")
 
-            if response_text.strip().lower() != "looks ok!":
+            if response_text.strip().lower() != "looks good!":
                 exit(1)
 
         except Exception as e:
