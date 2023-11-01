@@ -19,7 +19,7 @@ parser.add_argument('--mode', default="files", help='PR interpretation form. Opt
 
 parser.add_argument('--file_extensions', default=".php,.js", help='File extensions to be reviewed. Provide a comma-separated list without spaces')
 
-parser.add_argument('--prompt_text', default="Review this code: {code}" type=str, help='Custom text to guide the model for code review')
+parser.add_argument('--prompt_text', default="Review this code: {code}", type=str, help='Custom text to guide the model for code review')
 
 
 args = parser.parse_args()
