@@ -39,8 +39,8 @@ def files():
         for file in files:
             try:
                 # Getting the file name and content
-                filename = file.filename
-                content = repo.get_contents(filename, ref=commit.sha).decoded_content
+                file_name = file.filename
+                content = repo.get_contents(file_name, ref=commit.sha).decoded_content
 
                 # Sending the code to ChatGPT
                 response = openai.ChatCompletion.create(
@@ -63,7 +63,7 @@ def files():
 
                 if response_text.strip().lower() != "looks ok!":
                     exit(1)
-                    
+
             except Exception as e:
                 error_message = str(e)
                 pull_request.create_issue_comment(f"ChatGPT encountered an error while processing `{file.filename}`: {error_message}")
