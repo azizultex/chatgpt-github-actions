@@ -122,9 +122,6 @@ def patch():
                 print(f"Skipping {file_name} as {file_extension} will be ignored.")
                 continue
 
-
-            print("Now running Chat Completion")
-
             response = openai.ChatCompletion.create(
                 model=args.openai_engine,
                 messages=[
@@ -154,6 +151,9 @@ def patch():
 
 # Construct the prompt
 def prompt_text(code: str) -> str:
+
+    print("args.prompt_text inside prompt_text func", args.prompt_text);
+
     prompt = args.prompt_text.replace("{code}", code)
 
     print("prompt", prompt)
