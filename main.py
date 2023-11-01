@@ -17,7 +17,7 @@ parser.add_argument('--openai_temperature', default=0.5, help='Sampling temperat
 parser.add_argument('--openai_max_tokens', default=2048, help='The maximum number of tokens to generate in the completion.')
 parser.add_argument('--mode', default="files", help='PR interpretation form. Options: files, patch')
 
-parser.add_argument('--file_extensions', default=".php,js", help='File extensions to be reviewed. Provide a comma-separated list without spaces')
+parser.add_argument('--file_extensions', default=".php,.js", help='File extensions to be reviewed. Provide a comma-separated list without spaces')
 
 parser.add_argument('--prompt_text', type=str, help='Custom text to guide the model for code review')
 
@@ -121,6 +121,9 @@ def patch():
             if file_extension not in file_extensions:
                 print(f"Skipping {file_name} as {file_extension} will be ignored.")
                 continue
+
+
+            print("Now running Chat Completion")
 
             response = openai.ChatCompletion.create(
                 model=args.openai_engine,
