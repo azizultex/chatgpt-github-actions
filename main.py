@@ -49,9 +49,14 @@ def files():
                 print("content", content)
 
                 # Sending the code to ChatGPT
-                response = openai.Completion.create(
-                    engine=args.openai_engine,
-                    prompt=prompt_text(content),
+                response = openai.ChatCompletion.create(
+                    model=args.openai_engine,
+                    messages=[
+                        {
+                            "role" : "user",
+                            "content" : prompt_text(content)
+                        }
+                    ],
                     temperature=float(args.openai_temperature),
                     max_tokens=int(args.openai_max_tokens)
                 )
@@ -87,9 +92,9 @@ def patch():
             file_name = diff_text.split("b/")[1].splitlines()[0]
             print(file_name)
 
-            response = openai.Completion.create(
-                engine=args.openai_engine,
-                prompt=(f"Summarize what was done in this diff:\n```{diff_text}```"),
+            response = openai.ChatCompletion.create(
+                model=args.openai_engine,
+                messages=prompt_text(diff_text),
                 temperature=float(args.openai_temperature),
                 max_tokens=int(args.openai_max_tokens)
             )
@@ -107,7 +112,7 @@ def patch():
 # Construct the prompt
 def prompt_text(code: str) -> str:
     prompt = f"""
-    Please thoroughly review the provided WordPress theme or plugin code based on the following criteria:
+    Please thoroughly review the provided WordPress theme or plugin code from Github pull request based on the following criteria:
     1. **Best Practices**: Ensure the code adheres to WordPress Codex standards.
     2. **Security**: Look for potential vulnerabilities, especially in data handling. Ensure proper sanitization methods are used.
     3. **Readability**: Suggest improvements to make the code more readable and maintainable.
