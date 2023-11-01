@@ -17,9 +17,9 @@ parser.add_argument('--openai_temperature', default=0.5, help='Sampling temperat
 parser.add_argument('--openai_max_tokens', default=2048, help='The maximum number of tokens to generate in the completion.')
 parser.add_argument('--mode', default="files", help='PR interpretation form. Options: files, patch')
 
-parser.add_argument('--file_extensions', default=".php,.js", help='File extensions to be reviewed. Provide a comma-separated list without spaces')
+# parser.add_argument('--file_extensions', default=".php,.js", help='File extensions to be reviewed. Provide a comma-separated list without spaces')
 
-parser.add_argument('--prompt_text', type=str, help='Custom text to guide the model for code review')
+# parser.add_argument('--prompt_text', type=str, help='Custom text to guide the model for code review')
 
 
 args = parser.parse_args()
