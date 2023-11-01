@@ -27,11 +27,8 @@ g = Github(args.github_token)
 
 def files():
     repo = g.get_repo(os.getenv('GITHUB_REPOSITORY'))
-    print("repo", repo)
 
     pull_request = repo.get_pull(int(args.github_pr_id))
-
-    print("pull_request", pull_request)
 
     ## Loop through the commits in the pull request
     commits = pull_request.get_commits()
@@ -39,16 +36,11 @@ def files():
         # Getting the modified files in the commit
         files = commit.files
 
-        print("files", files)
-
         for file in files:
             try:
                 # Getting the file name and content
                 filename = file.filename
                 content = repo.get_contents(filename, ref=commit.sha).decoded_content
-
-
-                print("prompt_text", prompt_text(content))
 
                 # Sending the code to ChatGPT
                 response = openai.ChatCompletion.create(
@@ -64,11 +56,16 @@ def files():
                 )
 
                 # Adding a comment to the pull request with ChatGPT's response
+                response_text = response['choices'][0]['message']['content'];
+
                 pull_request.create_issue_comment(
-                    f"ChatGPT's response about `{file.filename}`:\n {response['choices'][0]['message']['content']}")
+                    f"ChatGPT's response about ``{file_name}``:\n {response_text}")
+
+                if response_text.strip().lower() != "looks ok!":
+                    exit(1)
+                    
             except Exception as e:
                 error_message = str(e)
-                print(f"Error occurred for file {file.filename}: {error_message}")
                 pull_request.create_issue_comment(f"ChatGPT encountered an error while processing `{file.filename}`: {error_message}")
 
 
@@ -84,8 +81,6 @@ def patch():
 
     parsed_text = content.split("diff")
 
-    print("parsed_text", parsed_text)
-
     for diff_text in parsed_text:
         if len(diff_text) == 0:
             continue
@@ -94,22 +89,23 @@ def patch():
             file_name = diff_text.split("b/")[1].splitlines()[0]
             print(file_name)
 
-            print("prompt_text", prompt_text(diff_text))
-
             response = openai.ChatCompletion.create(
                 model=args.openai_engine,
                 messages=prompt_text(diff_text),
                 temperature=float(args.openai_temperature),
                 max_tokens=int(args.openai_max_tokens)
             )
-            print(response)
-            print(response['choices'][0]['text'])
+
+            response_text = response['choices'][0]['message']['content'];
 
             pull_request.create_issue_comment(
-                f"ChatGPT's response about ``{file_name}``:\n {response['choices'][0]['message']['content']}")
+                f"ChatGPT's response about ``{file_name}``:\n {response_text}")
+
+            if response_text.strip().lower() != "looks ok!":
+                exit(1)
+
         except Exception as e:
             error_message = str(e)
-            print(error_message)
             pull_request.create_issue_comment(f"ChatGPT was unable to process the response about {file_name}")
 
 
@@ -119,10 +115,9 @@ def prompt_text(code: str) -> str:
     Act as an expert php, javascript developer. Please thoroughly review the provided WordPress theme or plugin code from Github pull request based on the following criteria:
     1. **Best Practices**: Ensure the code adheres to WordPress Codex standards.
     2. **Security**: Look for potential vulnerabilities, especially in data handling. Ensure proper sanitization methods are used.
-    3. **Readability**: Suggest improvements to make the code more readable and maintainable.
+    3. **Readability**: Suggest improvements to make the code more readable and maintainable. Offer better names for variables, functions, and classes, if can be improved.
     4. **Optimization**: Analyze the time and space complexity, and recommend ways to enhance performance.
-    5. **Naming Conventions**: Offer better naming suggestions for variables, functions, and classes, if necessary.
-    After the analysis, please point out the exact issues in the code with line number in a block and provide possible solutions. Don't explain anything if codes looks fine. Just response "looks good!" if no possible issues found.
+    After the analysis, please point out the exact issues in the code with line number in a block and provide possible solutions. Don't explain anything if codes looks fine. Just response "Looks good!" if no serious issues found.
 
     CODE STARTS HERE:
 
@@ -145,8 +140,6 @@ def get_content_patch():
         raise Exception(response.text)
 
     return response.text
-
-    print("get_content_patch", response.text)
 
 
 if (args.mode == "files"):
