@@ -16,7 +16,18 @@ parser.add_argument('--openai_engine', default="text-davinci-002", help='GPT-3 m
 parser.add_argument('--openai_temperature', default=0.5, help='Sampling temperature to use. Higher values means the model will take more risks. Recommended: 0.5')
 parser.add_argument('--openai_max_tokens', default=2048, help='The maximum number of tokens to generate in the completion.')
 parser.add_argument('--mode', default="files", help='PR interpretation form. Options: files, patch')
+
+parser.add_argument('--file_extensions', default=".php,js", help='File extensions to be reviewed. Provide a comma-separated list without spaces')
+
+parser.add_argument('--prompt_text', type=str, help='Custom text to guide the model for code review')
+
+
 args = parser.parse_args()
+
+
+file_extensions = args.file_extensions.split(',')
+
+print('file_extensions', file_extensions)
 
 ## Authenticating with the OpenAI API
 openai.api_key = args.openai_api_key
@@ -40,6 +51,15 @@ def files():
             try:
                 # Getting the file name and content
                 file_name = file.filename
+
+                # Extract file extension
+                file_extension = os.path.splitext(file_name)[1]
+
+                # Filter file type
+                if file_extension not in file_extensions:
+                    print(f"Skipping {file_name} as {file_extension} will be ignored.")
+                    continue
+
                 content = repo.get_contents(file_name, ref=commit.sha).decoded_content
 
                 # Sending the code to ChatGPT
@@ -86,7 +106,7 @@ def patch():
     for diff_text in parsed_text:
 
         print("diff_text", diff_text)
-        
+
         if len(diff_text) == 0:
             continue
 
@@ -98,7 +118,8 @@ def patch():
             file_extension = os.path.splitext(file_name)[1]
 
             # Filter file type
-            if file_extension not in ['.php', '.js']:
+            if file_extension not in file_extensions:
+                print(f"Skipping {file_name} as {file_extension} will be ignored.")
                 continue
 
             response = openai.ChatCompletion.create(
@@ -130,19 +151,13 @@ def patch():
 
 # Construct the prompt
 def prompt_text(code: str) -> str:
-    prompt = f"""
-    Act as an expert php, javascript developer. Please thoroughly review the provided WordPress theme or plugin code from Github pull request based on the following criteria:
-    1. **Best Practices**: Ensure the code adheres to WordPress Codex standards.
-    2. **Security**: Look for potential vulnerabilities, especially in data handling. Ensure proper sanitization methods are used.
-    3. **Readability**: Suggest improvements to make the code more readable and maintainable. Offer better names for variables, functions, and classes, if can be improved.
-    4. **Optimization**: Analyze the time and space complexity, and recommend ways to enhance performance.
-    After the analysis, please point out the exact issues in the code with line number in a block and provide possible solutions. Don't explain anything if codes looks fine. Just response "Looks good!" if no serious issues found.
+    prompt = args.prompt_text.replace("{code}", code)
 
-    CODE STARTS HERE:
+    print("prompt", prompt)
 
-    {code}
-    """
     return prompt
+
+
 
 def get_content_patch():
     url = f"https://api.github.com/repos/{os.getenv('GITHUB_REPOSITORY')}/pulls/{args.github_pr_id}"

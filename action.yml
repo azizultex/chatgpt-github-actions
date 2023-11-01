@@ -30,6 +30,14 @@ inputs:
     description: 'How to capture PR changes. Options: files, patch'
     required: false
     default: 'files'
+  file_extensions:  # id of input
+    description: 'File extensions to be reviewed. Provide a comma-separated list without spaces, e.g., ".php,.js".'
+    required: false
+    default: '.php,.js'
+  prompt_text:  # id of input
+    description: 'Custom text to guide the model for code review. Make sure to have a placeholder for the code content, e.g., "{code}".'
+    required: false
+    default: 'Please review the code from Github pull request given below: {code}'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -41,3 +49,5 @@ runs:
     - ${{ inputs.openai_temperature }}
     - ${{ inputs.openai_max_tokens }}
     - ${{ inputs.mode }}
+    - ${{ inputs.file_extensions }}  # new argument for file extensions
+    - ${{ inputs.prompt_text }}  # new argument for prompt text
