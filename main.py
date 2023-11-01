@@ -84,6 +84,9 @@ def patch():
     print("parsed_text", parsed_text)
 
     for diff_text in parsed_text:
+
+        print("diff_text", diff_text)
+        
         if len(diff_text) == 0:
             continue
 
@@ -91,9 +94,21 @@ def patch():
             file_name = diff_text.split("b/")[1].splitlines()[0]
             print("file_name", file_name)
 
+            # Extract file extension
+            file_extension = os.path.splitext(file_name)[1]
+
+            # Filter file type
+            if file_extension not in ['.php', '.js']:
+                continue
+
             response = openai.ChatCompletion.create(
                 model=args.openai_engine,
-                messages=prompt_text(diff_text),
+                messages=[
+                            {
+                                "role" : "user",
+                                "content" : prompt_text(diff_text)
+                            }
+                        ],
                 temperature=float(args.openai_temperature),
                 max_tokens=int(args.openai_max_tokens)
             )
