@@ -63,7 +63,7 @@ def files():
                     print(f"Skipping {file_name} as {file_extension} will be ignored.")
                     continue
 
-                content = repo.get_contents(file_name, ref=commit.sha).decoded_content
+                content = repo.get_contents(file_name, ref=commit.sha).decoded_content.decode('utf-8')
 
                 # Sending the code to ChatGPT
                 response = openai.ChatCompletion.create(
