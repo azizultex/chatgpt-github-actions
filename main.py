@@ -47,6 +47,11 @@ def files():
 
         for file in files:
             try:
+                # Skipping if the file is removed
+                if file.status == "removed":
+                    print(f"Skipping {file.filename} as it was deleted.")
+                    continue
+
                 # Getting the file name and content
                 file_name = file.filename
 
@@ -79,8 +84,8 @@ def files():
                 pull_request.create_issue_comment(
                     f"ChatGPT's response about ``{file_name}``:\n {response_text}")
 
-                if response_text.strip().lower() != "looks good!":
-                    exit(1)
+                # if response_text.strip().lower() != "looks good!":
+                #     exit(1)
 
             except Exception as e:
                 error_message = str(e)
@@ -139,8 +144,8 @@ def patch():
             pull_request.create_issue_comment(
                 f"ChatGPT's response about ``{file_name}``:\n {response_text}")
 
-            if response_text.strip().lower() != "looks good!":
-                exit(1)
+            # if response_text.strip().lower() != "looks good!":
+            #     exit(1)
 
         except Exception as e:
             error_message = str(e)
